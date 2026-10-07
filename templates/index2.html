@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>성경 말씀 구절 / 단어 검색</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: '맑은 고딕', sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #000;
+            border-radius: 15px;
+            background-color: #fff;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .section {
+            border: 1px solid #000;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .section h3 {
+            margin: 0 0 10px 0;
+            padding: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #e5e5e5;
+            border-radius: 5px;
+        }
+        .section label {
+            display: block;
+            margin: 5px 0;
+        }
+        .section input[type="text"], 
+        .section select, 
+        .section button {
+            padding: 5px;
+            margin: 5px 0;
+            font-size: 12pt;
+            box-sizing: border-box;
+        }
+        .section input[type="text"] {
+            width: calc(100% - 100px);
+            display: inline-block;
+        }
+        .section button {
+            display: inline-block;
+            width: 80px;
+            margin-left: 10px;
+        }
+        .left, .right {
+            width: 48%;
+        }
+        .results-box {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .results-box h3 {
+            margin: 0 0 10px 0;
+            padding: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border-bottom: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            font-size: 10pt;
+            word-wrap: break-word;
+            white-space: pre-line;
+            overflow: hidden;
+        }
+        th.version, td.version {
+            width: 15%;
+        }
+        th.book, td.book {
+            width: 20%;
+        }
+        th.chapter-verse, td.chapter-verse {
+            width: 10%;
+        }
+        td.content {
+            text-align: left;
+            background-color: white;
+            white-space: normal;
+            word-break: break-all;
+        }
+        .english-content {
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 8px solid #3498db;
+            width: 40px;
+            height: 40px;
+            display: inline-block;
+            position: relative;
+            margin: 10px auto;
+        }
+        .loader-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            animation: none;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left section">
+            <h3>● 성경 버전 선택 [기본:한글KJV]</h3>
+            <form id="searchForm">
+                <select id="versions" name="versions" multiple style="height: 100px; width: calc(100% - 20px);">
+                    <!-- 이 부분은 백엔드 코드에 의해 채워질 것입니다. -->
+                </select>
+            </form>
+            <div class="results-box">
+                <h3>● 검색 결과</h3>
+                <table id="searchResult">
+                    <thead>
+                        <tr>
+                            <th class="version">버전</th>
+                            <th class="book">성경</th>
+                            <th class="chapter-verse">장:절</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResultBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="right section">
+            <div class="search-box">
+                <h3>● 성경 구절 검색</h3>
+                <label for="verse">예) 창1:10, 요3:16, 마1, 신1:10/15</label>
+                <input type="text" id="verse" name="verse">
+                <button type="button" id="verseSearchButton">검색</button>
+                <div class="loader hidden" id="loader-content">
+                    <div class="loader-text" id="loaderText-content">0s</div>
+                </div>
+            </div>
+            <div class="search-box">
+                <h3>● 성경 내용 검색</h3>
+                <label for="keyword">예) 사랑, 믿음, 소망</label>
+                <input type="text" id="keyword" name="keyword">
+                <button type="button" id="keywordSearchButton">검색</button>
+                <div class="loader hidden" id="loader-keyword">
+                    <div class="loader-text" id="loaderText-keyword">0s</div>
+                </div>
+            </div>
+        </div>
+        <div class="section results-box" style="width: 100%;">
+            <h3>성경 구절</h3>
+            <table>
+                <tbody id="searchResultContentBody">
+                </tbody>
+            </table>
+        </div>
+        <a href="/download">
+            <h3>성경 검색 프로그램 다운로드</h3>
+        </a>
+    </div>
+    <script>
+        document.getElementById('verseSearchButton').addEventListener('click', function(event) {
+            search('verse');
+        });
+
+        document.getElementById('keywordSearchButton').addEventListener('click', function(event) {
+            search('content');
+        });
+
+        document.getElementById('verse').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                search('verse');
+            }
+        });
+
+        document.getElementById('keyword').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                search('content');
+            }
+        });
+
+        function search(type) {
+            let versions = Array.from(document.getElementById('versions').selectedOptions).map(option => option.value);
+            let value = (type === 'verse') ? document.getElementById('verse').value : document.getElementById('keyword').value;
+
+            if (versions.length === 0) {
+                versions = ['한글KJV'];
+            }
+
+            // 로딩 애니메이션 표시
+            let loader = document.getElementById(type === 'verse' ? 'loader-content' : 'loader-keyword');
+            let loaderText = document.getElementById(type === 'verse' ? 'loaderText-content' : 'loaderText-keyword');
+            loader.classList.remove('hidden');
+            let startTime = Date.now();
+
+            let timer = setInterval(() => {
+                let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                loaderText.innerText = `${elapsedTime}s`;
+            }, 1000);
+
+            fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ versions: versions, type: type, value: value })
+            })
+            .then(response => {
+                clearInterval(timer);
+                loader.classList.add('hidden');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                let resultTableBody = document.querySelector('#searchResultBody');
+                let contentTableBody = document.querySelector('#searchResultContentBody');
+                resultTableBody.innerHTML = '';
+                contentTableBody.innerHTML = '';
+                if (data.length === 0) {
+                    let row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="3">결과가 없습니다.</td>`;
+                    resultTableBody.appendChild(row);
+                } else {
+                    data.forEach(result => {
+                        let resultRow = document.createElement('tr');
+                        resultRow.innerHTML = `<td class="version">${result[0]}</td><td class="book">${result[1]}</td><td class="chapter-verse">${result[2]}</td>`;
+                        resultTableBody.appendChild(resultRow);
+
+                        let contentRow = document.createElement('tr');
+                        let content = result[3];
+                        let eng_content = result[4] || ''; // 영어 내용을 result[4]로 가정
+                        if (type === 'content') {
+                            let regex = new RegExp(value, 'gi');
+                            content = content.replace(regex, match => `<span class="highlight">${match}</span>`);
+                        }
+                        contentRow.innerHTML = `<td colspan="3" class="content">${content}<br><span class="english-content">${eng_content}</span></td>`;
+                        contentTableBody.appendChild(contentRow);
+                    });
+                }
+            })
+            .catch(error => {
+                clearInterval(timer);
+                loader.classList.add('hidden');
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

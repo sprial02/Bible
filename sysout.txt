@@ -1,0 +1,45 @@
+nt authority\system
+
+사용 권한 정보
+----------------------
+
+사용 권한 이름                            설명                                                     상태      
+========================================= ======================================================== ==========
+SeAssignPrimaryTokenPrivilege             프로세스 수준 토큰 바꾸기                                사용 안 함
+SeLockMemoryPrivilege                     메모리에 페이지 잠금                                     사용      
+SeIncreaseQuotaPrivilege                  프로세스에 대한 메모리 할당량 조정                       사용 안 함
+SeTcbPrivilege                            운영 체제의 일부로 작동                                  사용      
+SeSecurityPrivilege                       감사 및 보안 로그 관리                                   사용 안 함
+SeTakeOwnershipPrivilege                  파일 또는 기타 개체의 소유권 가져오기                    사용 안 함
+SeLoadDriverPrivilege                     장치 드라이버 로드 및 언로드                             사용 안 함
+SeSystemProfilePrivilege                  프로필 시스템 성능                                       사용      
+SeSystemtimePrivilege                     시스템 시간 변경                                         사용 안 함
+SeProfileSingleProcessPrivilege           프로필 단일 프로세스                                     사용      
+SeIncreaseBasePriorityPrivilege           예약 우선 순위 증가                                      사용      
+SeCreatePagefilePrivilege                 페이지 파일 만들기                                       사용      
+SeCreatePermanentPrivilege                영구 공유 개체 만들기                                    사용      
+SeBackupPrivilege                         파일 및 디렉터리 백업                                    사용 안 함
+SeRestorePrivilege                        파일 및 디렉터리 복원                                    사용 안 함
+SeShutdownPrivilege                       시스템 종료                                              사용 안 함
+SeDebugPrivilege                          프로그램 디버깅                                          사용      
+SeAuditPrivilege                          보안 감사 생성                                           사용      
+SeSystemEnvironmentPrivilege              펌웨어 환경 값 수정                                      사용 안 함
+SeChangeNotifyPrivilege                   트래버스 검사 무시                                       사용      
+SeUndockPrivilege                         도킹 스테이션에서 컴퓨터 제거                            사용 안 함
+SeManageVolumePrivilege                   볼륨 유지 관리 작업 수행                                 사용 안 함
+SeImpersonatePrivilege                    인증 후 클라이언트 가장                                  사용      
+SeCreateGlobalPrivilege                   전역 개체 만들기                                         사용      
+SeIncreaseWorkingSetPrivilege             프로세스 작업 집합 향상                                  사용      
+SeTimeZonePrivilege                       시간대 변경                                              사용      
+SeCreateSymbolicLinkPrivilege             심볼 링크 만들기                                         사용      
+SeDelegateSessionUserImpersonatePrivilege 동일한 세션의 다른 사용자에 대한 가장 토큰을 가져옵니다. 사용      
+별칭     administrators
+설명     컴퓨터 도메인에 모든 액세스 권한을 가진 관리자입니다.
+
+구성원
+
+-------------------------------------------------------------------------------
+Administrator
+JHS
+명령을 잘 실행했습니다.
+

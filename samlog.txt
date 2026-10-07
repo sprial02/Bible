@@ -1,0 +1,2 @@
+nt authority\system
+액세스가 거부되었습니다.

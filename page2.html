@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>주일 설교 말씀 정리 노트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: '맑은 고딕';
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #000;
+            border-radius: 15px;
+            background-color: #fff;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .section {
+            border: 1px solid #000;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .section h3 {
+            margin: 0 0 10px 0;
+            padding: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #e5e5e5;
+            border-radius: 5px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #note {
+            border: 1px solid #000;
+            width: 100%;
+            height: 500px;
+        }
+        .navigation {
+            text-align: center;
+            font-size: 20px;
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 5px;
+            text-decoration: none;
+            background-color: #e5e5e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h3 class="sticky-header">◎ 주일 설교 말씀 정리 노트</h3>
+            <canvas id="note"></canvas>
+            <button onclick="saveNote()">저장</button>
+            <button onclick="loadNote()">불러오기</button>
+        </div>
+        <div class="section">
+            <a href="index.html" class="navigation">◀ 1페이지로 이동</a>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('note');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let notes = localStorage.getItem('notes') ? JSON.parse(localStorage.getItem('notes')) : [];
+
+        canvas.addEventListener('mousedown', () => drawing = true);
+        canvas.addEventListener('mouseup', () => {
+            drawing = false;
+            ctx.beginPath();
+        });
+        canvas.addEventListener('mousemove', draw);
+
+        function draw(event) {
+            if (!drawing) return;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'black';
+
+            ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+        }
+
+        function saveNote() {
+            const note = canvas.toDataURL();
+            notes.push(note);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            alert('저장되었습니다.');
+        }
+
+        function loadNote() {
+            if (notes.length === 0) {
+                alert('저장된 노트가 없습니다.');
+                return;
+            }
+            const img = new Image();
+            img.src = notes[notes.length - 1];
+            img.onload = () => ctx.drawImage(img, 0, 0);
+        }
+    </script>
+</body>
+</html>
